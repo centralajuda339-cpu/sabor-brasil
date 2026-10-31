@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-marca: #15803d;
+  --color-marca-escura: #166534;
+  --color-marca-clara: #f0fdf4;
+  --color-ouro: #facc15;
+  --color-azul-marca: #1e40af;
+  --color-fundo: #fbfaf5;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+:root {
+  --cor-texto: #1c1917;
+  --cor-superficie: #ffffff;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-fundo);
+  color: var(--cor-texto);
+}
+
+/* Todas as páginas usam <main>: ocupa a largura do ecrã, com o máximo definido em cada página */
+main {
+  width: 100%;
+}
+
+/* Por defeito, o navegador não deixa um <fieldset> encolher, e isso alarga a página */
+fieldset {
+  min-width: 0;
+}
+
+/* ================= TEMA ESCURO =================
+   Para ajustar um tom, mude só os valores deste bloco. */
+.dark {
+  color-scheme: dark;
+
+  --cor-texto: #ecefe9;
+  --cor-superficie: #161d18;
+  --color-fundo: #0e1310;
+  --color-marca-clara: #14301f;
+
+  /* Cinzentos (bordas, textos secundários, fundos suaves) */
+  --color-zinc-50: #1e2420;
+  --color-zinc-100: #252c27;
+  --color-zinc-200: #3a423c;
+  --color-zinc-300: #4d564f;
+  --color-zinc-500: #a8b0a9;
+  --color-zinc-600: #c3cac4;
+  --color-zinc-700: #d6dcd7;
+  --color-zinc-900: #f3f5f2;
+
+  /* Etiquetas e mensagens coloridas */
+  --color-green-100: #143d27;
+  --color-green-200: #1f6b3d;
+  --color-green-800: #86efac;
+  --color-amber-100: #3b2a08;
+  --color-amber-700: #fbbf24;
+  --color-amber-800: #fcd34d;
+  --color-red-50: #2a1313;
+  --color-red-100: #3a1616;
+  --color-red-200: #7f1d1d;
+  --color-red-700: #fca5a5;
+  --color-red-800: #fecaca;
+  --color-blue-100: #172554;
+  --color-blue-800: #93c5fd;
+}
+
+/* Fundo branco dos cartões, campos e botões passa a ser a superfície escura */
+.dark .bg-white {
+  background-color: var(--cor-superficie);
+}
+.dark .bg-green-50 {
+  background-color: #12301f;
+}
+
+/* Verdes mais claros para se lerem bem sobre fundo escuro */
+.dark .text-marca {
+  color: #4ade80;
+}
+.dark .text-marca-escura {
+  color: #86efac;
+}
