@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sem ligação · Sabor Brasil</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        display: flex;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        background: #f0fdf4;
+        color: #14532d;
+        text-align: center;
+        padding: 1.5rem;
+      }
+      img {
+        width: 96px;
+        height: 96px;
+        border-radius: 20px;
+      }
+      button {
+        margin-top: 1rem;
+        padding: 0.6rem 1.2rem;
+        border: 0;
+        border-radius: 0.5rem;
+        background: #15803d;
+        color: white;
+        font-size: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/icons/icon-192.png" alt="Sabor Brasil" />
+      <h1>Sem ligação à internet</h1>
+      <p>
+        Para reservar a sua mesa precisa de estar ligado. Verifique a sua
+        ligação e tente outra vez.
+      </p>
+      <button onclick="location.reload()">Tentar de novo</button>
+    </main>
+  </body>
+</html>
