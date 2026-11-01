@@ -1,8 +1,11 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   CashCoin,
+  ChevronRight,
   Grid3x3Gap,
+  People,
   PeopleFill,
   Person,
   ShieldCheck,
@@ -19,16 +22,12 @@ import {
 } from "./Formularios";
 import Topo from "../../componentes/Topo";
 import IconeZona from "../../componentes/IconeZona";
-import { botaoContorno, painelFormulario } from "../../componentes/estilos";
+import { botaoContorno, cartao, painelFormulario } from "../../componentes/estilos";
 
 export default function PaginaGestor() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-6">
-      <Topo
-        marcaHref="/staff"
-        voltarPara="/staff"
-        voltarTexto="Painel de reservas"
-      />
+      <Topo marcaHref="/staff" voltarPara="/staff" voltarTexto="Painel de reservas" />
       <h1 className="mb-6 text-2xl font-bold">Área do gestor</h1>
       <Suspense fallback={<p className="text-zinc-500">A carregar...</p>}>
         <Conteudo />
@@ -46,7 +45,7 @@ async function Conteudo() {
   // Controlo de acesso por perfil: só o gestor vê esta página
   if (eu.perfil !== "GESTOR") redirect("/staff");
 
-  const [config, contas, zonas, reservasComMesa] = await Promise.all([
+  const [config, contas, zonas, reservasComMesa, totalClientes] = await Promise.all([
     obterConfiguracao(),
     prisma.staff.findMany({ orderBy: { nome: "asc" } }),
     prisma.zona.findMany({
@@ -57,16 +56,34 @@ async function Conteudo() {
       where: { estado: "CONFIRMADA", mesaId: { not: null } },
       select: { mesaId: true },
     }),
+    prisma.cliente.count(),
   ]);
 
   const mesasEmUso = new Set(reservasComMesa.map((r) => r.mesaId));
 
   return (
     <div className="space-y-6">
+      <Link
+        href="/staff/gestor/clientes"
+        className={`${cartao} flex items-center justify-between gap-3 transition hover:bg-marca-clara`}
+      >
+        <span className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-marca-clara text-marca">
+            <People size={20} aria-hidden />
+          </span>
+          <span>
+            <span className="block font-semibold">Clientes registados</span>
+            <span className="block text-sm text-zinc-500">
+              {totalClientes} {totalClientes === 1 ? "cliente" : "clientes"} · ver quem são
+            </span>
+          </span>
+        </span>
+        <ChevronRight size={16} aria-hidden />
+      </Link>
+
       <section className={painelFormulario}>
         <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
-          <CashCoin size={22} className="text-marca" aria-hidden /> Valores da
-          reserva
+          <CashCoin size={22} className="text-marca" aria-hidden /> Valores da reserva
         </h2>
         <FormularioConfiguracao
           taxaPorPessoa={config.taxaPorPessoa}
@@ -76,8 +93,7 @@ async function Conteudo() {
 
       <section className={painelFormulario}>
         <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
-          <PeopleFill size={22} className="text-marca" aria-hidden /> Contas do
-          restaurante
+          <PeopleFill size={22} className="text-marca" aria-hidden /> Contas do restaurante
         </h2>
 
         <ul className="mb-6 space-y-2">
@@ -89,9 +105,7 @@ async function Conteudo() {
               <div>
                 <p className="font-medium">
                   {c.nome}{" "}
-                  <span className="text-sm font-normal text-zinc-500">
-                    {c.telefone}
-                  </span>
+                  <span className="text-sm font-normal text-zinc-500">{c.telefone}</span>
                 </p>
                 <p className="mt-1 flex flex-wrap items-center gap-2 text-xs font-semibold">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-2.5 py-1 text-zinc-700">
@@ -104,9 +118,7 @@ async function Conteudo() {
                   </span>
                   <span
                     className={`rounded-full px-2.5 py-1 ${
-                      c.ativo
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
+                      c.ativo ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                     }`}
                   >
                     {c.ativo ? "Ativa" : "Desativada"}
@@ -131,16 +143,12 @@ async function Conteudo() {
 
       <section className={painelFormulario}>
         <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
-          <Grid3x3Gap size={22} className="text-marca" aria-hidden /> Zonas e
-          mesas
+          <Grid3x3Gap size={22} className="text-marca" aria-hidden /> Zonas e mesas
         </h2>
 
         <div className="mb-6 space-y-3">
           {zonas.map((zona) => (
-            <div
-              key={zona.id}
-              className="rounded-xl border border-zinc-200 p-4"
-            >
+            <div key={zona.id} className="rounded-xl border border-zinc-200 p-4">
               <p className="flex items-center gap-3 font-semibold">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-marca-clara text-marca">
                   <IconeZona nome={zona.nome} />
@@ -149,8 +157,7 @@ async function Conteudo() {
                   {zona.nome}
                   <span className="block text-sm font-normal text-zinc-500">
                     {zona.mesas.length} mesas ·{" "}
-                    {zona.mesas.reduce((total, m) => total + m.capacidade, 0)}{" "}
-                    lugares
+                    {zona.mesas.reduce((total, m) => total + m.capacidade, 0)} lugares
                   </span>
                 </span>
               </p>
@@ -163,9 +170,7 @@ async function Conteudo() {
                   >
                     <span>
                       {zona.nome} {indice + 1}{" "}
-                      <span className="text-zinc-500">
-                        ({m.capacidade} lugares)
-                      </span>
+                      <span className="text-zinc-500">({m.capacidade} lugares)</span>
                     </span>
                     {mesasEmUso.has(m.id) ? (
                       <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
@@ -190,9 +195,7 @@ async function Conteudo() {
         </div>
 
         <h3 className="mb-3 font-semibold">Adicionar mesa</h3>
-        <FormularioNovaMesa
-          zonas={zonas.map((z) => ({ id: z.id, nome: z.nome }))}
-        />
+        <FormularioNovaMesa zonas={zonas.map((z) => ({ id: z.id, nome: z.nome }))} />
       </section>
     </div>
   );
