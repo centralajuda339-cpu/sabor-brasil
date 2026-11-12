@@ -1,13 +1,17 @@
 import { Suspense } from "react";
+import EstadoVazio from "../componentes/EstadoVazio";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   CalendarEvent,
   CalendarPlus,
+  CashStack,
   Clock,
   CreditCard,
   ExclamationTriangle,
+  FileEarmarkPdf,
   People,
+  Person,
   XCircle,
 } from "react-bootstrap-icons";
 import { prisma } from "../../lib/prisma";
@@ -20,11 +24,18 @@ import {
   HORAS_MINIMAS_PARA_CANCELAR,
 } from "../../lib/reservas/ciclo-de-vida";
 import { cancelarReserva } from "./actions";
+import Carregando from "../componentes/Carregando";
 import Separadores from "../Separadores";
+import { bordaEstado } from "../componentes/estilos";
 import Topo from "../componentes/Topo";
 import SeloEstado from "../componentes/SeloEstado";
 import IconeZona from "../componentes/IconeZona";
-import { botaoPerigo, botaoPrimario, cartao } from "../componentes/estilos";
+import {
+  botaoContorno,
+  botaoPerigo,
+  botaoPrimario,
+  cartao,
+} from "../componentes/estilos";
 
 const ESTADOS_ATIVOS = ["PENDENTE", "AGUARDA_PAGAMENTO", "CONFIRMADA"];
 
@@ -44,7 +55,7 @@ export default function PaginaReservas({
         </Link>
       </div>
 
-      <Suspense fallback={<p className="text-zinc-500">A carregar...</p>}>
+      <Suspense fallback={<Carregando />}>
         <ListaReservas searchParams={searchParams} />
       </Suspense>
     </main>
@@ -66,7 +77,12 @@ async function ListaReservas({
 
   const todas = await prisma.reserva.findMany({
     where: { clienteId },
-    include: { zona: true, pagamento: true },
+    include: {
+      zona: true,
+      pagamento: true,
+      staff: { select: { nome: true } },
+      liquidadoPor: { select: { nome: true } },
+    },
     orderBy: { dataHora: "desc" },
   });
 
@@ -95,19 +111,24 @@ async function ListaReservas({
       />
 
       {reservas.length === 0 && (
-        <p className="rounded-2xl border border-dashed border-zinc-300 p-6 text-center text-zinc-500">
-          {vistaAtiva === "ativas"
-            ? "Não tem reservas ativas."
-            : "Ainda não tem reservas no histórico."}
-        </p>
+        <EstadoVazio
+          icone={CalendarEvent}
+          titulo={
+            vistaAtiva === "ativas" ? "Sem reservas ativas" : "Sem histórico"
+          }
+          mensagem={
+            vistaAtiva === "ativas"
+              ? "Faça uma nova reserva para aparecer aqui."
+              : "As reservas concluídas e canceladas aparecem aqui."
+          }
+        />
       )}
-
       <ul className="space-y-3">
         {reservas.map((r) => {
           const p = r.pagamento;
 
           return (
-            <li key={r.id} className={cartao}>
+            <li key={r.id} className={`${cartao} ${bordaEstado(r.estado)}`}>
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="flex items-center gap-2 text-lg font-semibold">
@@ -181,6 +202,35 @@ async function ListaReservas({
                       restaurante, com a mesma referência.
                     </p>
                   )}
+                </div>
+              )}
+
+              {(r.staff?.nome || r.liquidadoPor?.nome) && (
+                <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                  {r.staff?.nome && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-marca-clara px-2.5 py-1 text-marca-escura">
+                      <Person size={12} aria-hidden /> Mesa atribuída por{" "}
+                      <strong>{r.staff.nome}</strong>
+                    </span>
+                  )}
+                  {r.liquidadoPor?.nome && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-blue-800">
+                      <CashStack size={12} aria-hidden /> Pagamento confirmado
+                      por <strong>{r.liquidadoPor.nome}</strong>
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {p && r.estado !== "CANCELADA" && (
+                <div className="mt-3">
+                  <Link
+                    href={`/reservas/${r.id}/recibo`}
+                    className={botaoContorno}
+                    target="_blank"
+                  >
+                    <FileEarmarkPdf size={16} aria-hidden /> Ver recibo (PDF)
+                  </Link>
                 </div>
               )}
 
