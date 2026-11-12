@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { useActionState } from "react";
 import { Clock } from "react-bootstrap-icons";
 import { criarReserva } from "./actions";
+import MapaMesas, { type MesaMapa } from "./MapaMesas";
 import IconeZona from "../componentes/IconeZona";
+import Spinner from "../componentes/Spinner";
 import Mensagem from "../componentes/Mensagem";
 import {
   botaoPrimario,
@@ -15,24 +18,40 @@ import {
 export default function FormularioReserva({
   zonas,
 }: {
-  zonas: { id: string; nome: string }[];
+  zonas: {
+    id: string;
+    nome: string;
+    mesas: { id: string; capacidade: number; indice: number }[];
+  }[];
 }) {
   const [estado, formAction, pendente] = useActionState(criarReserva, {
     mensagem: "",
   });
+  const [zonaSelecionada, setZonaSelecionada] = useState(zonas[0]?.id ?? "");
+  const [mesaSelecionada, setMesaSelecionada] = useState<string | null>(null);
+
+  // Mapa de mesas por zona (pré-carregado do servidor)
+  const mesasDaZona: MesaMapa[] =
+    zonas.find((z) => z.id === zonaSelecionada)?.mesas ?? [];
+
+  function aoMudarZona(novaZona: string) {
+    setZonaSelecionada(novaZona);
+    setMesaSelecionada(null); // reset da mesa ao mudar de zona
+  }
 
   return (
     <form action={formAction} className="space-y-5">
       <fieldset>
         <legend className={rotulo}>Área preferida</legend>
         <div className="grid grid-cols-3 gap-2">
-          {zonas.map((zona, indice) => (
+          {zonas.map((zona) => (
             <label key={zona.id} className="block">
               <input
                 type="radio"
                 name="zonaId"
                 value={zona.id}
-                defaultChecked={indice === 0}
+                checked={zonaSelecionada === zona.id}
+                onChange={() => aoMudarZona(zona.id)}
                 className="peer sr-only"
               />
               <div
@@ -47,6 +66,18 @@ export default function FormularioReserva({
           ))}
         </div>
       </fieldset>
+
+      {/* Planta visual das mesas */}
+      <div>
+        <p className={rotulo}>Escolha uma mesa (opcional)</p>
+        <MapaMesas
+          mesas={mesasDaZona}
+          mesaSelecionadaId={mesaSelecionada}
+          onSelecionar={setMesaSelecionada}
+        />
+        {/* Campo hidden para enviar a mesa preferida ao submeter */}
+        <input type="hidden" name="mesaId" value={mesaSelecionada ?? ""} />
+      </div>
 
       <div>
         <label htmlFor="nPessoas" className={rotulo}>
@@ -84,7 +115,13 @@ export default function FormularioReserva({
         disabled={pendente}
         className={`${botaoPrimario} w-full`}
       >
-        {pendente ? "A verificar..." : "Reservar"}
+        {pendente ? (
+          <>
+            <Spinner size={16} /> A verificar...
+          </>
+        ) : (
+          "Reservar"
+        )}
       </button>
 
       {estado.mensagem && <Mensagem>{estado.mensagem}</Mensagem>}
