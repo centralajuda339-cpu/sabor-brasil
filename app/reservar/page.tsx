@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { CalendarPlus } from "react-bootstrap-icons";
 import { prisma } from "../../lib/prisma";
 import { obterClienteId } from "../../lib/sessao";
+import Carregando from "../componentes/Carregando";
 import FormularioReserva from "./FormularioReserva";
 import Topo from "../componentes/Topo";
 import { painelFormulario } from "../componentes/estilos";
@@ -21,7 +22,7 @@ export default function PaginaReservar() {
           Escolha a área, o número de pessoas e o horário.
         </p>
 
-        <Suspense fallback={<p className="text-zinc-500">A carregar...</p>}>
+        <Suspense fallback={<Carregando />}>
           <ConteudoReservar />
         </Suspense>
       </div>
@@ -34,10 +35,27 @@ async function ConteudoReservar() {
   const clienteId = await obterClienteId();
   if (!clienteId) redirect("/entrar");
 
-  const zonas = await prisma.zona.findMany({
-    select: { id: true, nome: true },
+  // Carrega as zonas com as respetivas mesas, para desenhar o mapa visual.
+  // O índice (1, 2, 3...) é calculado aqui para servir de rótulo amigável.
+  const zonasComMesas = await prisma.zona.findMany({
+    include: {
+      mesas: {
+        orderBy: [{ capacidade: "asc" }, { id: "asc" }],
+        select: { id: true, capacidade: true },
+      },
+    },
     orderBy: { nome: "asc" },
   });
+
+  const zonas = zonasComMesas.map((z) => ({
+    id: z.id,
+    nome: z.nome,
+    mesas: z.mesas.map((m, indice) => ({
+      id: m.id,
+      capacidade: m.capacidade,
+      indice: indice + 1,
+    })),
+  }));
 
   return <FormularioReserva zonas={zonas} />;
 }
