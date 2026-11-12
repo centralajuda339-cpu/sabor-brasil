@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { BoxArrowInRight } from "react-bootstrap-icons";
+import CampoSenha from "../componentes/CampoSenha";
 import { entrarCliente } from "./actions";
 import Topo from "../componentes/Topo";
+import Spinner from "../componentes/Spinner";
 import Mensagem from "../componentes/Mensagem";
 import {
   botaoPrimario,
@@ -49,26 +51,26 @@ export default function PaginaEntrar() {
             />
           </div>
 
-          <div>
-            <label htmlFor="senha" className={rotulo}>
-              Palavra-passe
-            </label>
-            <input
-              id="senha"
-              name="senha"
-              type="password"
-              autoComplete="current-password"
-              required
-              className={campo}
-            />
-          </div>
+          <CampoSenha
+            id="senha"
+            name="senha"
+            label="Palavra-passe"
+            autoComplete="current-password"
+            required
+          />
 
           <button
             type="submit"
             disabled={pendente}
             className={`${botaoPrimario} w-full`}
           >
-            {pendente ? "A entrar..." : "Entrar"}
+            {pendente ? (
+              <>
+                <Spinner size={16} /> A entrar...
+              </>
+            ) : (
+              "Entrar"
+            )}
           </button>
 
           {estado.mensagem && <Mensagem>{estado.mensagem}</Mensagem>}
