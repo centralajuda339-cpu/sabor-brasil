@@ -91,3 +91,21 @@ fieldset {
 .dark .text-marca-escura {
   color: #86efac;
 }
+html {
+  scroll-behavior: smooth;
+}
+
+/* ================= IMPRESSÃO / PDF =================
+   O recibo em /reservas/[id]/recibo usa estas regras
+   para sair limpo quando o cliente faz Cmd/Ctrl+P. */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+}
