@@ -20,6 +20,7 @@ import {
 import { prisma } from "../../lib/prisma";
 import { obterStaffId } from "../../lib/sessao";
 import { obterPagamento } from "../../lib/pagamentos/metodos";
+import { bordaEstado } from "../componentes/estilos";
 import { cancelarReservasExpiradas } from "../../lib/reservas/ciclo-de-vida";
 import {
   consultarHistorico,
@@ -34,6 +35,7 @@ import {
   sairStaff,
 } from "./actions";
 import AtribuirMesa from "./AtribuirMesa";
+import Carregando from "../componentes/Carregando";
 import Separadores from "../Separadores";
 import Marca from "../componentes/Marca";
 import SeloEstado from "../componentes/SeloEstado";
@@ -69,6 +71,8 @@ type ReservaParaMostrar = {
     tipo: string;
     referencia: string;
   } | null;
+  staff: { nome: string } | null;
+  liquidadoPor: { nome: string } | null;
 };
 
 export default function PaginaStaff({
@@ -78,7 +82,7 @@ export default function PaginaStaff({
 }) {
   return (
     <main className="mx-auto max-w-4xl px-4 py-6">
-      <Suspense fallback={<p className="text-zinc-500">A carregar...</p>}>
+      <Suspense fallback={<Carregando />}>
         <Painel searchParams={searchParams} />
       </Suspense>
     </main>
@@ -152,6 +156,23 @@ function CorpoReserva({
           <Table size={15} aria-hidden /> Mesa atribuída: {rotuloMesa[r.mesaId]}
         </p>
       )}
+
+      {(r.staff?.nome || r.liquidadoPor?.nome) && (
+        <div className="mt-3 flex flex-wrap gap-2 text-xs">
+          {r.staff?.nome && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-marca-clara px-2.5 py-1 text-marca-escura">
+              <Person size={12} aria-hidden /> Mesa atribuída por{" "}
+              <strong>{r.staff.nome}</strong>
+            </span>
+          )}
+          {r.liquidadoPor?.nome && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-blue-800">
+              <CashCoin size={12} aria-hidden /> Pagamento confirmado por{" "}
+              <strong>{r.liquidadoPor.nome}</strong>
+            </span>
+          )}
+        </div>
+      )}
     </>
   );
 }
@@ -176,7 +197,13 @@ async function Painel({
   const [ativas, mesas] = await Promise.all([
     prisma.reserva.findMany({
       where: { estado: { in: ["AGUARDA_PAGAMENTO", "CONFIRMADA"] } },
-      include: { cliente: true, zona: true, pagamento: true },
+      include: {
+        cliente: true,
+        zona: true,
+        pagamento: true,
+        staff: { select: { nome: true } },
+        liquidadoPor: { select: { nome: true } },
+      },
       orderBy: { dataHora: "asc" },
     }),
     prisma.mesa.findMany({
@@ -323,7 +350,7 @@ async function Painel({
             </p>
             <ul className="space-y-3">
               {historico.map((r) => (
-                <li key={r.id} className={cartao}>
+                <li key={r.id} className={`${cartao} ${bordaEstado(r.estado)}`}>
                   <CorpoReserva r={r} rotuloMesa={rotuloMesa} />
                 </li>
               ))}
@@ -361,7 +388,7 @@ async function Painel({
           const totalmentePago = p ? p.valorPago >= p.valorTotal : false;
 
           return (
-            <li key={r.id} className={cartao}>
+            <li key={r.id} className={`${cartao} ${bordaEstado(r.estado)}`}>
               <CorpoReserva r={r} rotuloMesa={rotuloMesa} />
 
               {r.estado === "CONFIRMADA" && (
