@@ -1,8 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
-import { guardarConfiguracao, criarStaff, adicionarMesa } from "./actions";
+import {
+  guardarConfiguracao,
+  guardarConfiguracaoCupom,
+  criarStaff,
+  adicionarMesa,
+} from "./actions";
 import Mensagem from "../../componentes/Mensagem";
+import CampoSenha from "../../componentes/CampoSenha";
 import { botaoPrimario, campo, rotulo } from "../../componentes/estilos";
 
 const ESTADO_INICIAL = { mensagem: "", sucesso: false };
@@ -104,19 +110,13 @@ export function FormularioNovoStaff() {
             className={campo}
           />
         </div>
-        <div>
-          <label htmlFor="senha" className={rotulo}>
-            Palavra-passe (mínimo 6 caracteres)
-          </label>
-          <input
-            id="senha"
-            name="senha"
-            type="password"
-            autoComplete="new-password"
-            required
-            className={campo}
-          />
-        </div>
+        <CampoSenha
+          id="senha"
+          name="senha"
+          label="Palavra-passe (mínimo 6 caracteres)"
+          autoComplete="new-password"
+          required
+        />
         <div>
           <label htmlFor="perfil" className={rotulo}>
             Perfil
@@ -178,6 +178,64 @@ export function FormularioNovaMesa({
       </div>
       <button type="submit" disabled={pendente} className={botaoPrimario}>
         {pendente ? "A adicionar..." : "Adicionar mesa"}
+      </button>
+      <Resposta estado={estado} />
+    </form>
+  );
+}
+
+export function FormularioCupomConfig({
+  reservasParaCupom,
+  percentagemCupom,
+}: {
+  reservasParaCupom: number;
+  percentagemCupom: number;
+}) {
+  const [estado, formAction, pendente] = useActionState(
+    guardarConfiguracaoCupom,
+    ESTADO_INICIAL,
+  );
+
+  return (
+    <form action={formAction} className="space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="reservasParaCupom" className={rotulo}>
+            Reservas concluídas por mês para ganhar cupão
+          </label>
+          <input
+            id="reservasParaCupom"
+            name="reservasParaCupom"
+            type="number"
+            min={1}
+            max={100}
+            defaultValue={reservasParaCupom}
+            required
+            className={campo}
+          />
+          <p className="mt-1 text-xs text-zinc-500">
+            Conta as reservas CONCLUÍDAS no mesmo mês (não o número de pessoas).
+          </p>
+        </div>
+        <div>
+          <label htmlFor="percentagemCupom" className={rotulo}>
+            Percentagem de desconto (%)
+          </label>
+          <input
+            id="percentagemCupom"
+            name="percentagemCupom"
+            type="number"
+            min={1}
+            max={100}
+            step="any"
+            defaultValue={percentagemCupom}
+            required
+            className={campo}
+          />
+        </div>
+      </div>
+      <button type="submit" disabled={pendente} className={botaoPrimario}>
+        {pendente ? "A guardar..." : "Guardar regras de fidelidade"}
       </button>
       <Resposta estado={estado} />
     </form>
