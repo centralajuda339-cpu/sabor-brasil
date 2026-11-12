@@ -5,11 +5,11 @@ import {
   BoxArrowRight,
   CalendarCheck,
   CalendarPlus,
-  PersonCircle,
   PersonPlus,
 } from "react-bootstrap-icons";
 import { prisma } from "../lib/prisma";
 import { obterClienteId, terminarSessao } from "../lib/sessao";
+import Avatar from "./componentes/Avatar";
 import { botaoContorno, botaoPrimario } from "./componentes/estilos";
 
 export default async function CabecalhoUtilizador() {
@@ -37,13 +37,16 @@ export default async function CabecalhoUtilizador() {
     );
   }
 
-  const primeiroNome = cliente.nome.split(" ")[0];
-
   return (
     <nav className="flex flex-wrap items-center gap-2">
-      <span className="inline-flex items-center gap-1.5 pr-1 text-sm text-zinc-600">
-        <PersonCircle size={18} aria-hidden /> Olá, {primeiroNome}
-      </span>
+      <Link href="/conta" className={botaoContorno} title="Ver a minha conta">
+        <Avatar
+          nome={cliente.nome}
+          avatarUrl={cliente.avatarUrl}
+          tamanho={24}
+        />
+        Minha conta
+      </Link>
       <Link href="/reservar" className={botaoPrimario}>
         <CalendarPlus size={16} aria-hidden /> Reservar mesa
       </Link>
