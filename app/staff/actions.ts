@@ -67,23 +67,32 @@ export async function atribuirMesa(
 
 // O cliente pagou o restante no restaurante
 export async function confirmarLiquidacao(formData: FormData) {
-  await exigirStaff();
+  const staff = await exigirStaff();
   const reservaId = String(formData.get("reservaId") ?? "");
 
   const pagamento = await prisma.pagamento.findUnique({ where: { reservaId } });
   if (!pagamento || pagamento.valorPago >= pagamento.valorTotal) return;
 
-  await prisma.pagamento.update({
-    where: { reservaId },
-    data: { valorPago: pagamento.valorTotal, estado: "TOTAL" },
-  });
+  await prisma.$transaction([
+    prisma.pagamento.update({
+      where: { reservaId },
+      data: { valorPago: pagamento.valorTotal, estado: "TOTAL" },
+    }),
+    prisma.reserva.update({
+      where: { id: reservaId },
+      data: {
+        liquidadoPorStaffId: staff.id,
+        dataLiquidacao: new Date(),
+      },
+    }),
+  ]);
 
   revalidatePath("/staff");
 }
 
 // O cliente chegou, foi servido e a conta está paga
 export async function concluirReserva(formData: FormData) {
-  await exigirStaff();
+  const staff = await exigirStaff();
   const reservaId = String(formData.get("reservaId") ?? "");
 
   const reserva = await prisma.reserva.findUnique({
@@ -102,7 +111,12 @@ export async function concluirReserva(formData: FormData) {
 
   await prisma.reserva.update({
     where: { id: reserva.id },
-    data: { estado: "CONCLUIDA" },
+    data: {
+      estado: "CONCLUIDA",
+      // Se ninguém tinha registado a liquidação, fica associada a quem conclui
+      liquidadoPorStaffId: reserva.liquidadoPorStaffId ?? staff.id,
+      dataLiquidacao: reserva.dataLiquidacao ?? new Date(),
+    },
   });
 
   revalidatePath("/staff");
