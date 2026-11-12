@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { PersonPlus } from "react-bootstrap-icons";
+import CampoSenha from "../componentes/CampoSenha";
 import { registarCliente } from "./actions";
 import Topo from "../componentes/Topo";
 import Mensagem from "../componentes/Mensagem";
+import Spinner from "../componentes/Spinner";
 import {
   botaoPrimario,
   campo,
@@ -62,33 +64,21 @@ export default function PaginaRegisto() {
             />
           </div>
 
-          <div>
-            <label htmlFor="senha" className={rotulo}>
-              Palavra-passe (mínimo 6 caracteres)
-            </label>
-            <input
-              id="senha"
-              name="senha"
-              type="password"
-              autoComplete="new-password"
-              required
-              className={campo}
-            />
-          </div>
+          <CampoSenha
+            id="senha"
+            name="senha"
+            label="Palavra-passe (mínimo 6 caracteres)"
+            autoComplete="new-password"
+            required
+          />
 
-          <div>
-            <label htmlFor="confirmacao" className={rotulo}>
-              Repita a palavra-passe
-            </label>
-            <input
-              id="confirmacao"
-              name="confirmacao"
-              type="password"
-              autoComplete="new-password"
-              required
-              className={campo}
-            />
-          </div>
+          <CampoSenha
+            id="confirmacao"
+            name="confirmacao"
+            label="Repita a palavra-passe"
+            autoComplete="new-password"
+            required
+          />
 
           <p className="text-xs text-zinc-500">
             A verificação por código SMS ficará disponível em breve.
@@ -99,7 +89,13 @@ export default function PaginaRegisto() {
             disabled={pendente}
             className={`${botaoPrimario} w-full`}
           >
-            {pendente ? "A criar..." : "Criar conta"}
+            {pendente ? (
+              <>
+                <Spinner size={16} /> A criar...
+              </>
+            ) : (
+              "Criar conta"
+            )}
           </button>
 
           {estado.mensagem && (
