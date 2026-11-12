@@ -4,10 +4,12 @@ export default function Separadores({
   caminho,
   ativo,
   itens,
+  paramName = "vista",
 }: {
   caminho: string;
   ativo: string;
   itens: { chave: string; rotulo: string; contagem?: number }[];
+  paramName?: string;
 }) {
   return (
     <nav className="mb-4 flex flex-wrap gap-2" aria-label="Filtros">
@@ -16,7 +18,7 @@ export default function Separadores({
         return (
           <Link
             key={item.chave}
-            href={`${caminho}?vista=${item.chave}`}
+            href={`${caminho}?${paramName}=${item.chave}`}
             aria-current={selecionado ? "page" : undefined}
             className={
               selecionado
