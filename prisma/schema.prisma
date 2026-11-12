@@ -16,8 +16,10 @@ model Cliente {
   nome        String
   telefone    String    @unique
   senhaHash   String
+  avatarUrl   String?
   dataRegisto DateTime  @default(now())
   reservas    Reserva[]
+  cupons      Cupom[]
 }
 
 model Zona {
@@ -37,37 +39,46 @@ model Mesa {
 }
 
 model Staff {
-  id        String    @id @default(cuid())
-  nome      String
-  telefone  String    @unique
-  senhaHash String
-  perfil    String // "STAFF" ou "GESTOR"
-  ativo     Boolean   @default(true)
-  reservas  Reserva[]
+  id            String    @id @default(cuid())
+  nome          String
+  telefone      String    @unique
+  senhaHash     String
+  perfil        String // "STAFF" ou "GESTOR"
+  ativo         Boolean   @default(true)
+  reservas      Reserva[] // reservas onde este staff atribuiu a mesa
+  liquidacoes   Reserva[] @relation("Liquidacoes") // reservas onde confirmou o pagamento
 }
 
 model Configuracao {
-  id                String @id @default("geral")
-  taxaPorPessoa     Float  @default(500)
-  percentagemMinima Float  @default(30)
+  id                    String @id @default("geral")
+  taxaPorPessoa         Float  @default(500)
+  percentagemMinima     Float  @default(30)
+  // Programa de fidelidade: quantas reservas (concluídas) num mês dão direito a cupão
+  reservasParaCupom     Int    @default(4)
+  percentagemCupom      Float  @default(10)
 }
 
 model Reserva {
-  id        String     @id @default(cuid())
-  clienteId String
-  cliente   Cliente    @relation(fields: [clienteId], references: [id])
-  zonaId    String
-  zona      Zona       @relation(fields: [zonaId], references: [id])
-  mesaId    String?
-  mesa      Mesa?      @relation(fields: [mesaId], references: [id])
-  staffId   String?
-  staff     Staff?     @relation(fields: [staffId], references: [id])
-  nPessoas  Int
-  dataHora  DateTime
-  duracao   Int        @default(120)
-  estado    String     @default("PENDENTE")
-  pagamento Pagamento?
-  criadaEm  DateTime   @default(now())
+  id                  String     @id @default(cuid())
+  clienteId           String
+  cliente             Cliente    @relation(fields: [clienteId], references: [id])
+  zonaId              String
+  zona                Zona       @relation(fields: [zonaId], references: [id])
+  mesaId              String?
+  mesa                Mesa?      @relation(fields: [mesaId], references: [id])
+  // Staff que atribuiu a mesa (já existente)
+  staffId             String?
+  staff               Staff?     @relation(fields: [staffId], references: [id])
+  // Staff que confirmou a liquidação do pagamento em falta
+  liquidadoPorStaffId String?
+  liquidadoPor        Staff?     @relation("Liquidacoes", fields: [liquidadoPorStaffId], references: [id])
+  dataLiquidacao      DateTime?
+  nPessoas            Int
+  dataHora            DateTime
+  duracao             Int        @default(120)
+  estado              String     @default("PENDENTE")
+  pagamento           Pagamento?
+  criadaEm            DateTime   @default(now())
 }
 
 model Pagamento {
@@ -97,4 +108,18 @@ model ItemCardapio {
   nome        String
   descricao   String?
   preco       Float
+}
+
+// Cupões gerados automaticamente quando um cliente atinge X reservas concluídas num mês
+model Cupom {
+  id           String   @id @default(cuid())
+  codigo       String   @unique
+  clienteId    String
+  cliente      Cliente  @relation(fields: [clienteId], references: [id])
+  // mês a que se refere, no formato "YYYY-MM" (hora de Moçambique)
+  mesReferente String
+  percentagem  Float
+  criadoEm     DateTime @default(now())
+  validoAte    DateTime
+  usadoEm      DateTime?
 }
