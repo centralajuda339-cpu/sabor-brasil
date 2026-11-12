@@ -42,7 +42,13 @@ export async function consultarHistorico({
 
   return prisma.reserva.findMany({
     where: { AND: filtros },
-    include: { cliente: true, zona: true, pagamento: true },
+    include: {
+      cliente: true,
+      zona: true,
+      pagamento: true,
+      staff: { select: { nome: true } },
+      liquidadoPor: { select: { nome: true } },
+    },
     orderBy: { dataHora: "desc" },
     take: MAXIMO_HISTORICO,
   });
