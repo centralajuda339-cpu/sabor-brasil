@@ -3,7 +3,9 @@ import Link from "next/link";
 import { Building, CalendarPlus, Sun, Water } from "react-bootstrap-icons";
 import { prisma } from "../lib/prisma";
 import CabecalhoUtilizador from "./CabecalhoUtilizador";
+import Carregando from "./componentes/Carregando";
 import Marca from "./componentes/Marca";
+import Suporte from "./componentes/Suporte";
 import { cartao } from "./componentes/estilos";
 
 function IconeZona({ nome }: { nome: string }) {
@@ -15,14 +17,14 @@ function IconeZona({ nome }: { nome: string }) {
 export default function Home() {
   return (
     <main className="mx-auto max-w-3xl space-y-10 px-4 py-6 sm:px-6">
-      <header className="flex flex-wrap items-center justify-between gap-4">
+      <header className="sticky top-0 z-30 -mx-4 flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200/60 bg-fundo/85 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6">
         <Marca />
         <Suspense fallback={null}>
           <CabecalhoUtilizador />
         </Suspense>
       </header>
 
-      <section className="rounded-3xl bg-marca p-6 text-white shadow-md sm:p-10">
+      <section className="rounded-3xl bg-gradient-to-br from-marca via-marca to-marca-escura p-6 text-white shadow-lg sm:p-10">
         <p className="text-sm font-medium text-ouro">
           Restaurante · Piscina · Esplanada
         </p>
@@ -41,9 +43,11 @@ export default function Home() {
         </Link>
       </section>
 
-      <Suspense fallback={<p className="text-zinc-500">A carregar dados...</p>}>
+      <Suspense fallback={<Carregando texto="A carregar dados..." />}>
         <DadosDoRestaurante />
       </Suspense>
+
+      <Suporte />
     </main>
   );
 }
