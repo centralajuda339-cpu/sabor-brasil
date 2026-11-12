@@ -50,6 +50,50 @@ export async function guardarConfiguracao(
   return { mensagem: "Valores guardados.", sucesso: true };
 }
 
+export async function guardarConfiguracaoCupom(
+  _estadoAnterior: { mensagem: string; sucesso: boolean },
+  formData: FormData,
+): Promise<{ mensagem: string; sucesso: boolean }> {
+  await exigirGestor();
+
+  const reservasParaCupom = Number(formData.get("reservasParaCupom"));
+  const percentagemCupom = Number(formData.get("percentagemCupom"));
+
+  if (
+    !Number.isInteger(reservasParaCupom) ||
+    reservasParaCupom < 1 ||
+    reservasParaCupom > 100
+  ) {
+    return {
+      mensagem: "O número de reservas deve estar entre 1 e 100.",
+      sucesso: false,
+    };
+  }
+  if (
+    !Number.isFinite(percentagemCupom) ||
+    percentagemCupom < 1 ||
+    percentagemCupom > 100
+  ) {
+    return {
+      mensagem: "A percentagem de desconto deve estar entre 1 e 100.",
+      sucesso: false,
+    };
+  }
+
+  await prisma.configuracao.upsert({
+    where: { id: "geral" },
+    update: { reservasParaCupom, percentagemCupom },
+    create: {
+      id: "geral",
+      reservasParaCupom,
+      percentagemCupom,
+    },
+  });
+
+  revalidatePath("/staff/gestor");
+  return { mensagem: "Regras de fidelidade guardadas.", sucesso: true };
+}
+
 export async function criarStaff(
   _estadoAnterior: { mensagem: string; sucesso: boolean },
   formData: FormData,
