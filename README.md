@@ -11,7 +11,7 @@
 |---|---|---|
 | **Cliente** | https://sabor-brasil-neon.vercel.app | Crie uma conta em `/registar` |
 | **Gestor** | https://sabor-brasil-neon.vercel.app/staff/entrar | Use as credenciais abaixo |
-| **Github** | https://github.com/centralajuda339-cpu/sabor-brasil/tree/main |
+| **Github** | https://github.com/centralajuda339-cpu/sabor-brasil |
 
 ### Credenciais de demonstração (Gestor)
 
