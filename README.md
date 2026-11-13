@@ -11,12 +11,18 @@
 |---|---|---|
 | **Cliente** | https://sabor-brasil-neon.vercel.app | Crie uma conta em `/registar` |
 | **Gestor** | https://sabor-brasil-neon.vercel.app/staff/entrar | Use as credenciais abaixo |
+| **Github** | https://github.com/centralajuda339-cpu/sabor-brasil/tree/main |
 
 ### Credenciais de demonstração (Gestor)
 
 ```
-Telemóvel : 84 000 0000   
-Senha     : 123abc
+Telemóvel : 84 000 0000   (ou o número definido na instalação)
+Senha     : (definida pelo grupo — apresentar ao docente em papel)
+```
+
+> ⚠️ Por segurança, as credenciais reais do gestor são entregues ao docente
+> separadamente e não ficam neste ficheiro público.
+
 ---
 
 ## 👥 Equipa
