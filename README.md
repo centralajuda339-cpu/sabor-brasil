@@ -15,13 +15,8 @@
 ### Credenciais de demonstração (Gestor)
 
 ```
-Telemóvel : 84 000 0000   (ou o número definido na instalação)
-Senha     : (definida pelo grupo — apresentar ao docente em papel)
-```
-
-> ⚠️ Por segurança, as credenciais reais do gestor são entregues ao docente
-> separadamente e não ficam neste ficheiro público.
-
+Telemóvel : 84 000 0000   
+Senha     : 123abc
 ---
 
 ## 👥 Equipa
